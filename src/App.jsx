@@ -1,0 +1,1593 @@
+import { useEffect, useState } from "react";
+import { db } from "./firebase/config";
+import { ref, onValue, set, remove } from "firebase/database";
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, } from "recharts";
+import {
+  Sparkles,
+  Gamepad2,
+  UserCog,
+  LayoutDashboard,
+  ParkingCircle,
+  BarChart3,
+  History,
+  Settings,
+  Info,
+  CarFront,
+  CircleParking,
+  FlaskConical,
+  Brain,
+  BotIcon,
+  StarHalfIcon,
+  StarIcon,
+  OrbitIcon,
+} from "lucide-react";
+
+import { motion } from "framer-motion";
+
+function App() {
+
+  const [slots, setSlots] = useState({
+    slot1: 0,
+    slot2: 0,
+    slot3: 0,
+  });
+
+const [showBooking, setShowBooking] = useState(false);
+
+const [showAnalytics, setShowAnalytics] = useState(false);
+
+const [analyticsData, setAnalyticsData] = useState([]);
+
+const [showAdmin, setShowAdmin] = useState(false);
+
+const [showAdminLogin, setShowAdminLogin] = useState(false);
+
+const [showAbout, setShowAbout] = useState(false);
+
+const [showTicTacToe, setShowTicTacToe] = useState(false);
+
+const [adminPassword, setAdminPassword] = useState("");
+
+const [bookingData, setBookingData] = useState({
+  vehicle: "",
+  slot: "",
+});
+
+const [bookings, setBookings] = useState({});
+
+  useEffect(() => {
+
+    const parkingRef = ref(db, "parking");
+
+    onValue(parkingRef, (snapshot) => {
+
+      const data = snapshot.val();
+
+      if (data) {
+        setSlots(data);
+        if (data) {
+          setSlots(data);
+          
+          // SAVE ANALYTICS
+          const occupiedCount = Object.values(data).filter(v => v === 1).length;
+          const total = Object.keys(data).length;
+          const occupancyPercent = Math.round((occupiedCount / total) * 100);
+          
+          set(ref(db, `analytics/${Date.now()}`), {
+            occupancy: occupancyPercent,
+            occupied: occupiedCount,
+            timestamp: new Date().toISOString(),
+            hour: new Date().getHours(),
+            date: new Date().toLocaleDateString("en-GB"),
+          });
+        }
+      }
+
+    });
+
+  }, []);
+
+  useEffect(() => {
+
+    const bookingRef = ref(db, "bookings");
+  
+    onValue(bookingRef, (snapshot) => {
+  
+      const data = snapshot.val();
+  
+      if (data) {
+  
+        setBookings(data);
+  
+      } else {
+  
+        setBookings({});
+  
+      }
+  
+    });
+  
+  }, []);
+
+  useEffect(() => {
+    const analyticsRef = ref(db, "analytics");
+    onValue(analyticsRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const entries = Object.values(data)
+          .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
+          .slice(-168);
+        setAnalyticsData(entries);
+      }
+    });
+  }, []);
+
+  // LIVE SLOTS
+
+  const liveSlots = [
+
+    {
+      id: 1,
+      occupied: slots.slot1 === 1,
+      reserved: bookings.slot1,
+      live: true,
+    },
+  
+    {
+      id: 2,
+      occupied: slots.slot2 === 1,
+      reserved: bookings.slot2,
+      live: true,
+    },
+  
+    {
+      id: 3,
+      occupied: slots.slot3 === 1,
+      reserved: bookings.slot3,
+      live: true,
+    },
+  
+  ];
+
+  // DEMO SLOTS
+
+  const demoSlots = [
+
+    { id: 4, occupied: false, reserved: bookings.slot4 },
+  
+    { id: 5, occupied: true, reserved: bookings.slot5 },
+  
+    { id: 6, occupied: true, reserved: bookings.slot6 },
+  
+    { id: 7, occupied: false, reserved: bookings.slot7 },
+  
+    { id: 8, occupied: true, reserved: bookings.slot8 },
+  
+    { id: 9, occupied: false, reserved: bookings.slot9 },
+  
+    { id: 10, occupied: true, reserved: bookings.slot10 },
+  
+    { id: 11, occupied: false, reserved: bookings.slot11 },
+  
+    { id: 12, occupied: true, reserved: bookings.slot12 },
+  
+    { id: 13, occupied: true, reserved: bookings.slot13 },
+  
+    { id: 14, occupied: false, reserved: bookings.slot14 },
+  
+    { id: 15, occupied: true, reserved: bookings.slot15 },
+  
+  ];
+
+  const parkingSlots = [...liveSlots, ...demoSlots];
+  const availableSlots = parkingSlots.filter(
+    (slot) =>
+      !slot.occupied &&
+      !slot.reserved
+  );
+
+  const occupiedCount = parkingSlots.filter(
+    (slot) => slot.occupied
+  ).length;
+
+  const availableCount = parkingSlots.filter(
+    (slot) =>
+      !slot.occupied &&
+      !slot.reserved
+  ).length;
+
+  const occupancy =
+    Math.round(
+      (occupiedCount / parkingSlots.length) * 100
+    );
+
+    const recommendedSlot =
+  parkingSlots.find(
+    (slot) =>
+      !slot.occupied &&
+      !slot.reserved &&
+      slot.live
+  );
+
+  const vikiMessages = [
+
+    recommendedSlot
+      ? `Best parking choice is Slot ${recommendedSlot.id}`
+      : "Parking area is currently full",
+  
+    "I am here to help you find the best parking slot",
+  
+    "Real-time smart parking assistance active",
+  
+    "Monitoring parking availability live",
+
+    "Tired of waiting for a slot? Play with VIKI.",
+  
+  ];
+  
+  const [messageIndex, setMessageIndex] = useState(0);
+
+  const [darkMode, setDarkMode] = useState(false);
+
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  
+  useEffect(() => {
+  
+    const interval = setInterval(() => {
+  
+      setMessageIndex((prev) =>
+        (prev + 1) % vikiMessages.length
+      );
+  
+    }, 5000);
+  
+    return () => clearInterval(interval);
+  
+  }, [vikiMessages.length]);
+
+  return (
+
+    <div className="h-screen flex overflow-hidden relative">
+   {/* FIXED BACKGROUND */}
+<div
+  style={{
+    backgroundImage: darkMode ? "url('/car2.jpg')" : "url('/car.jpg')",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
+  }}
+  className="fixed inset-0 z-0"
+/>
+
+ 
+
+      {/* SIDEBAR */}
+
+      <div className={`
+  text-white
+  flex
+  flex-col
+  justify-between
+  transition-all
+  duration-300
+  h-screen
+  sticky
+  top-0
+  overflow-hidden
+  relative
+  z-10
+
+  ${sidebarOpen
+    ? "w-[260px]"
+    : "w-[90px]"}
+
+    ${darkMode ? "bg-[#1A0F0A]" : "bg-[#4A6666]"}
+`}>
+
+        <div>
+
+          {/* LOGO */}
+
+          <div className="p-7 border-b border-white/10">
+          <div className="flex justify-end mb-4">
+
+<button
+
+  onClick={() =>
+    setSidebarOpen(!sidebarOpen)
+  }
+
+  className="
+    bg-white/10
+    hover:bg-white/20
+    transition-all
+    p-2
+    rounded-xl
+  "
+>
+
+  {sidebarOpen ? "←" : "→"}
+
+</button>
+
+</div>
+
+            <div className="flex items-center gap-4">
+
+            <div className={`${darkMode ? "bg-[#C4622D] text-white" : "bg-white text-[#4A6666]"} p-3 rounded-xl`}>
+  <ParkingCircle size={30} />
+</div>
+
+              {sidebarOpen && (
+
+<div>
+
+<h1 className={`text-3xl font-bold ${darkMode ? "text-[#F0A055]" : "text-white"}`}>
+  Smart Parking
+</h1>
+
+</div>
+
+)}
+
+            </div>
+
+          </div>
+
+          {/* MENU */}
+
+          <div className={`p-4 flex flex-col gap-2 mt-4 ${darkMode ? "text-[#F0A055]" : "text-white"}`}>
+
+          <div className={`${darkMode ? "bg-[#F0A055]/15" : "bg-white/15"} rounded-2xl p-4 flex items-center gap-4 cursor-pointer`}>
+              <LayoutDashboard />
+              {sidebarOpen && (
+
+<span className="font-semibold">
+  Dashboard
+</span>
+
+)}
+            </div>
+
+            <div
+
+  onClick={() => setShowBooking(true)}
+
+  className={`
+  hover:bg-white/10
+  rounded-2xl
+  p-4
+  flex
+  items-center
+  cursor-pointer
+  transition-all
+
+  ${sidebarOpen
+    ? "gap-4"
+    : "justify-center"}
+`}
+>
+
+  <ParkingCircle />
+
+  {sidebarOpen && (
+
+<span className="font-semibold">
+  Slot Booking
+</span>
+
+)}
+
+</div>
+
+<div
+  onClick={() => setShowAnalytics(true)}
+  className={`
+  hover:bg-white/10
+  rounded-2xl
+  p-4
+  flex
+  items-center
+  cursor-pointer
+  transition-all
+
+  ${sidebarOpen
+    ? "gap-4"
+    : "justify-center"}
+`}>
+  <BarChart3 />
+  {sidebarOpen && (
+    <span className="font-semibold">
+      Analytics
+    </span>
+  )}
+</div>
+
+            
+
+<div
+  onClick={() => setShowTicTacToe(true)}
+  className={`
+    hover:bg-white/10
+    rounded-2xl
+    p-4
+    flex
+    items-center
+    cursor-pointer
+    transition-all
+    ${sidebarOpen ? "gap-4" : "justify-center"}
+  `}
+>
+  <Gamepad2 />
+  {sidebarOpen && <span className="font-semibold">Play with VIKI</span>}
+</div>
+
+            <div
+  onClick={() => setShowAbout(true)}
+  className={`
+    hover:bg-white/10
+    rounded-2xl
+    p-4
+    flex
+    items-center
+    cursor-pointer
+    transition-all
+    ${sidebarOpen ? "gap-4" : "justify-center"}
+  `}
+>
+  <Info />
+  {sidebarOpen && <span className="font-semibold">About</span>}
+</div>
+
+            <div
+
+onClick={() => setShowAdminLogin(true)}
+
+  className="
+    hover:bg-white/10
+    rounded-2xl
+    p-4
+    flex
+    items-center
+    gap-4
+    cursor-pointer
+    transition-all
+  "
+>
+
+  <UserCog />
+
+  {sidebarOpen && (
+
+<span className="font-semibold">
+  Admin
+</span>
+)}
+
+</div>
+
+      </div>
+
+      </div>
+      </div>
+
+      {/* MAIN CONTENT */}
+
+<div
+  className={`
+    flex-1
+    p-8
+    transition-all
+    relative
+    z-10
+    overflow-y-auto
+
+    ${darkMode
+      ? "text-white"
+      : "text-black"}
+  `}
+>
+
+
+        {/* TOP BAR */}
+
+        <div className="flex justify-between items-center mb-10 relative z-20">
+
+        <div>
+
+<h1 className={`
+  text-3xl
+  font-bold
+
+  ${darkMode
+    ? "text-black"
+    : "text-white"}
+`}>
+  Dashboard
+</h1>
+
+</div>
+
+          <div className="flex items-center gap-8 text-gray-600">
+
+          <div className={`${darkMode ? "text-[#F0A055]" : "text-[#4A6666]"}`}>
+  {new Date().toLocaleDateString("en-GB")}
+</div>
+
+<div className={`${darkMode ? "text-[#F0A055]" : "text-[#4A6666]"}`}>
+  {new Date().toLocaleTimeString()}
+</div>
+
+          <button
+
+onClick={() => setDarkMode(!darkMode)}
+
+className={`
+  px-5
+  py-2
+  rounded-2xl
+  font-semibold
+  transition-all
+
+  ${darkMode
+    ? "bg-[#F0A055] text-black"
+    : "bg-[#4A6666] text-white"}
+`}
+>
+
+{darkMode ? "☀️" : "🌙"}
+
+</button>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-[#FFC300] rounded-full"></div>
+              <span className={`font-semibold ${darkMode ? "text-[#F0A055]" : ""}`}>
+  Live
+</span>
+            </div>
+
+            
+
+          </div>
+
+        </div>
+
+        {/* COMPACT STATUS BAR */}
+
+        <div className={`
+  rounded-3xl
+  shadow-sm
+  p-6
+  flex
+  flex-wrap
+  gap-10
+  mb-10
+  transition-all
+
+  ${darkMode
+    ? "bg-[#1A0F0A]/80"
+    : "bg-[#AECECE]/40"}
+`}>
+
+          <div>
+
+            <p className="text-black-500">
+              Total Slots
+            </p>
+
+            <h2 className={`text-4xl font-bold ${darkMode ? "text-[#F0A055]" : "text-black"}`}>
+              {parkingSlots.length}
+            </h2>
+
+          </div>
+
+          <div>
+
+            <p className="text-black-500">
+              Occupied
+            </p>
+
+            <h2 className="text-4xl font-bold text-red-500">
+              {occupiedCount}
+            </h2>
+
+          </div>
+
+          <div>
+
+            <p className="text-black-500">
+              Available
+            </p>
+
+            <h2 className="text-4xl font-bold text-green-500">
+              {availableCount}
+            </h2>
+
+          </div>
+
+          <div>
+
+            <p className="text-black-500">
+              Occupancy
+            </p>
+
+            <h2 className={`text-4xl font-bold ${darkMode ? "text-[#F0A055]" : "text-black"}`}>
+              {occupancy}%
+            </h2>
+
+          </div>
+
+        </div>
+
+        {/* PARKING HEADER */}
+
+        <div className="flex justify-between items-center mb-6">
+
+        </div>
+
+        {/* PARKING GRID */}
+
+        <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-3 relative z-20">
+
+          {parkingSlots.map((slot) => (
+
+            <motion.div
+              whileHover={{ scale: 1.03 }}
+              key={slot.id}
+              className={`
+  rounded-3xl
+  shadow-sm
+  p-6
+  border
+  transition-all
+
+  ${darkMode
+    ? "bg-[#1A0F0A]/60 border-[#F0A055]/20"
+    : "bg-white/50 border-gray-100"}
+`}
+            >
+
+              <div className="flex justify-between items-center mb-5">
+
+              <h2 className={`
+  text-2xl
+  font-bold
+
+  ${darkMode
+    ? "text-white"
+    : "text-black"}
+`}>
+                  Slot {slot.id}
+                </h2>
+
+                <div className={`
+                  px-4 py-1 rounded-full text-sm font-semibold
+                  ${slot.occupied
+                    ? "bg-red-100 text-red-500"
+                    : slot.reserved
+                    ? "bg-yellow-100 text-yellow-600"
+                    : "bg-green-100 text-green-600"}
+                `}>
+
+{slot.occupied
+  ? "Occupied"
+  : slot.reserved
+  ? "Reserved"
+  : "Available"}
+
+                </div>
+
+              </div>
+
+              {/* PARKING VISUAL */}
+
+              <div className={`
+                h-[220px]
+                rounded-2xl
+                border-2
+                flex
+                items-center
+                justify-center
+                relative
+                overflow-hidden
+                ${slot.occupied
+                  ? darkMode
+                    ? "border-red-500 bg-red-500/10"
+                    : "border-red-400"
+                  : darkMode
+                    ? "border-green-500 bg-green-500/5 border-dashed"
+                    : "border-green-400 border-dashed"}
+              `}>
+
+                {slot.occupied ? (
+
+                  <CarFront
+                    size={110}
+                    className="text-red-500"
+                  />
+
+                ) : (
+
+                  <CircleParking
+                    size={90}
+                    className="text-green-500 opacity-50"
+                  />
+
+                )}
+
+              </div>
+
+              <div className={`
+  mt-4
+  text-center
+  text-sm
+
+  ${darkMode
+    ? "text-gray-400"
+    : "text-gray-500"}
+`}>
+
+                {slot.live
+                  ? "Live Sensor Slot"
+                  : "Demo Slot"}
+
+              </div>
+
+            </motion.div>
+
+          ))}
+
+        </div>
+
+      </div>
+{/* VIKI AI ASSISTANT */}
+
+<motion.div
+
+  initial={{ y: 0 }}
+
+  animate={{
+    y: -6,
+  }}
+
+  transition={{
+    duration: 2,
+    repeat: Infinity,
+    repeatType: "reverse",
+    ease: "easeInOut",
+  }}
+
+  whileHover={{
+    scale: 1.02,
+    transition: {
+      type: "spring",
+      stiffness: 120,
+      damping: 12,
+    },
+  }}
+
+  className={`
+  fixed
+  bottom-6
+  right-6
+  ${darkMode ? "bg-[#1A0F0A]" : "bg-[#4A6666]"}
+  text-white
+  p-4
+  rounded-2xl
+  shadow-xl
+  cursor-pointer
+  z-50
+  w-[260px]
+  will-change-transform
+`}
+>
+
+  <div className="flex items-start gap-4">
+
+   {/* VIKI AI ICON */}
+
+<div className="
+  min-w-[50px]
+  h-[50px]
+  rounded-2xl
+  bg-white/10
+  flex
+  items-center
+  justify-center
+">
+
+  <OrbitIcon
+    size={22}
+    className={`${darkMode ? "text-[#F0A055]" : "text-white"}`}
+strokeWidth={2.5}
+  />
+
+</div>
+
+    {/* TEXT */}
+
+    <div>
+
+    <h2 className={`font-bold text-2xl ${darkMode ? "text-[#F0A055]" : "text-white"}`}>
+  VIKI
+</h2>
+
+<p className={`text-sm mb-3 ${darkMode ? "text-[#F0A055]/70" : "text-gray-400"}`}>
+  Virtual Intelligence Kinetic Interface
+</p>
+
+      <motion.p
+
+        key={messageIndex}
+
+        initial={{
+          opacity: 0,
+          y: 10,
+        }}
+
+        animate={{
+          opacity: 1,
+          y: 0,
+        }}
+
+        transition={{
+          duration: 0.5,
+        }}
+
+        className={`text-sm leading-relaxed ${darkMode ? "text-[#F0A055]" : "text-white"}`}
+      >
+
+        {vikiMessages[messageIndex]}
+
+      </motion.p>
+
+    </div>
+
+  </div>
+
+</motion.div>
+
+{/* ANALYTICS WINDOW */}
+
+{showAnalytics && (
+<div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+  <motion.div
+    initial={{ opacity: 0, scale: 0.9 }}
+    animate={{ opacity: 1, scale: 1 }}
+    transition={{ duration: 0.3 }}
+    className={`${darkMode ? "bg-[#1A0F0A]" : "bg-white"} w-[800px] max-h-[85vh] overflow-y-auto rounded-3xl p-8 shadow-2xl`}
+  >
+
+    {/* HEADER */}
+    <div className="flex justify-between items-center mb-8">
+      <div>
+        <h2 className={`text-3xl font-bold ${darkMode ? "text-[#F0A055]" : "text-[#4A6666]"}`}>
+          Analytics
+        </h2>
+        <p className={`mt-1 ${darkMode ? "text-[#F0A055]/70" : "text-gray-500"}`}>
+          Last 7 days overview
+        </p>
+      </div>
+      <button
+        onClick={() => setShowAnalytics(false)}
+        className={`w-10 h-10 rounded-full font-bold ${darkMode ? "bg-[#F0A055]/20 text-[#F0A055]" : "bg-gray-100 text-gray-600"}`}
+      >
+        ×
+      </button>
+    </div>
+
+    {/* OCCUPANCY OVER TIME */}
+    <div className={`rounded-3xl p-6 mb-6 ${darkMode ? "bg-[#F0A055]/5 border border-[#F0A055]/20" : "bg-gray-50"}`}>
+      <h3 className={`text-xl font-bold mb-4 ${darkMode ? "text-[#F0A055]" : "text-[#4A6666]"}`}>
+        Occupancy % Over Time
+      </h3>
+      <ResponsiveContainer width="100%" height={200}>
+        <LineChart data={analyticsData}>
+          <XAxis dataKey="date" stroke={darkMode ? "#F0A055" : "#4A6666"} tick={{ fontSize: 11 }} />
+          <YAxis stroke={darkMode ? "#F0A055" : "#4A6666"} tick={{ fontSize: 11 }} />
+          <Tooltip contentStyle={{ background: darkMode ? "#1A0F0A" : "white", border: "none", borderRadius: "12px" }} />
+          <Line type="monotone" dataKey="occupancy" stroke={darkMode ? "#F0A055" : "#4A6666"} strokeWidth={2} dot={false} />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+
+    {/* PEAK HOURS */}
+    <div className={`rounded-3xl p-6 mb-6 ${darkMode ? "bg-[#F0A055]/5 border border-[#F0A055]/20" : "bg-gray-50"}`}>
+      <h3 className={`text-xl font-bold mb-4 ${darkMode ? "text-[#F0A055]" : "text-[#4A6666]"}`}>
+        Peak Hours
+      </h3>
+      <ResponsiveContainer width="100%" height={200}>
+        <BarChart data={
+          Array.from({ length: 24 }, (_, i) => ({
+            hour: `${i}:00`,
+            count: analyticsData.filter(d => d.hour === i).length
+          }))
+        }>
+          <XAxis dataKey="hour" stroke={darkMode ? "#F0A055" : "#4A6666"} tick={{ fontSize: 10 }} />
+          <YAxis stroke={darkMode ? "#F0A055" : "#4A6666"} tick={{ fontSize: 11 }} />
+          <Tooltip contentStyle={{ background: darkMode ? "#1A0F0A" : "white", border: "none", borderRadius: "12px" }} />
+          <Bar dataKey="count" fill={darkMode ? "#F0A055" : "#4A6666"} radius={[6, 6, 0, 0]} />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+
+    {/* TOTAL VEHICLES PER DAY */}
+    <div className={`rounded-3xl p-6 ${darkMode ? "bg-[#F0A055]/5 border border-[#F0A055]/20" : "bg-gray-50"}`}>
+      <h3 className={`text-xl font-bold mb-4 ${darkMode ? "text-[#F0A055]" : "text-[#4A6666]"}`}>
+        Total Vehicles Per Day
+      </h3>
+      <ResponsiveContainer width="100%" height={200}>
+        <BarChart data={
+          [...new Set(analyticsData.map(d => d.date))].map(date => ({
+            date,
+            vehicles: analyticsData.filter(d => d.date === date && d.occupied > 0).length
+          }))
+        }>
+          <XAxis dataKey="date" stroke={darkMode ? "#F0A055" : "#4A6666"} tick={{ fontSize: 11 }} />
+          <YAxis stroke={darkMode ? "#F0A055" : "#4A6666"} tick={{ fontSize: 11 }} />
+          <Tooltip contentStyle={{ background: darkMode ? "#1A0F0A" : "white", border: "none", borderRadius: "12px" }} />
+          <Bar dataKey="vehicles" fill={darkMode ? "#C4622D" : "#7A9A9A"} radius={[6, 6, 0, 0]} />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+
+  </motion.div>
+</div>
+)}
+
+{/* BOOKING WINDOW */}
+
+{showBooking && (
+
+<div className="
+  fixed
+  inset-0
+  bg-black/40
+  flex
+  items-center
+  justify-center
+  z-50
+">
+
+  <motion.div
+
+    initial={{
+      opacity: 0,
+      scale: 0.9,
+    }}
+
+    animate={{
+      opacity: 1,
+      scale: 1,
+    }}
+
+    transition={{
+      duration: 0.3,
+    }}
+
+    className={`
+  ${darkMode ? "bg-[#1A0F0A]" : "bg-white"}
+  w-[450px]
+  rounded-3xl
+  p-8
+  shadow-2xl
+`}
+  >
+
+    {/* HEADER */}
+
+    <div className="flex justify-between items-center mb-8">
+
+      <div>
+
+      <h2 className={`text-3xl font-bold ${darkMode ? "text-[#F0A055]" : "text-[#4A6666]"}`}>
+  Slot Booking
+</h2>
+
+<p className={`mt-1 ${darkMode ? "text-[#F0A055]/70" : "text-gray-500"}`}>
+  Reserve your preferred parking slot
+</p>
+
+      </div>
+
+      <button
+  onClick={() => setShowBooking(false)}
+  className={`w-10 h-10 rounded-full font-bold ${darkMode ? "bg-[#F0A055]/20 text-[#F0A055]" : "bg-gray-100 text-gray-600"}`}
+>
+  ×
+</button>
+
+    </div>
+
+    {/* VEHICLE NUMBER */}
+
+<div className="mb-6">
+
+<label className={`block text-sm font-semibold mb-3 ${darkMode ? "text-[#F0A055]" : "text-gray-600"}`}>
+  Vehicle Number
+</label>
+
+<input
+  type="text"
+  placeholder="KL 11 AB 1234"
+  value={bookingData.vehicle}
+  onChange={(e) =>
+    setBookingData({
+      ...bookingData,
+      vehicle: e.target.value,
+    })
+  }
+  className={`w-full border rounded-2xl p-4 outline-none ${darkMode ? "bg-[#1A0F0A] border-[#F0A055]/40 text-[#F0A055] placeholder-[#F0A055]/40 focus:border-[#F0A055]" : "border-gray-300 focus:border-[#4A6666]"}`}
+/>
+
+</div>
+
+   {/* SLOT SELECT */}
+
+<div className="mb-8">
+
+<label className={`block text-sm font-semibold mb-3 ${darkMode ? "text-[#F0A055]" : "text-[gray-600]"}`}>
+  Preferred Slot
+</label>
+
+<select
+  value={bookingData.slot}
+  onChange={(e) =>
+    setBookingData({
+      ...bookingData,
+      slot: e.target.value,
+    })
+  }
+  className={`w-full border rounded-2xl p-4 outline-none ${darkMode ? "bg-[#1A0F0A] border-[#F0A055]/40 text-[#F0A055] focus:border-[#F0A055]" : "border-gray-300 focus:border-[#4A6666]"}`}
+>
+
+  <option value="">
+    Select Available Slot
+  </option>
+
+  {availableSlots.map((slot) => (
+
+    <option
+      key={slot.id}
+      value={slot.id}
+    >
+      Slot {slot.id}
+    </option>
+
+  ))}
+
+</select>
+
+</div>
+
+    {/* BOOK BUTTON */}
+
+    <button
+
+      onClick={async () => {
+
+        if (
+          !bookingData.vehicle ||
+          !bookingData.slot
+        ) {
+
+          alert("Please fill all fields");
+          return;
+
+        }
+
+        await set(
+          ref(
+            db,
+            `bookings/slot${bookingData.slot}`
+          ),
+          {
+            vehicle: bookingData.vehicle,
+            slot: bookingData.slot,
+            bookedAt:
+              new Date().toLocaleTimeString(),
+          }
+        );
+
+        alert("Slot Reserved Successfully");
+
+        setBookingData({
+          vehicle: "",
+          slot: "",
+        });
+
+        setShowBooking(false);
+
+      }}
+
+      className={`w-full ${darkMode ? "bg-[#F0A055] text-black" : "bg-[#4A6666] text-white"} py-4 rounded-2xl font-semibold hover:opacity-90 transition-all`}
+    >
+      Reserve Slot
+    </button>
+
+  </motion.div>
+
+</div>
+
+)}
+
+{/* ADMIN LOGIN WINDOW */}
+
+{showAdminLogin && (
+
+<div className="
+  fixed
+  inset-0
+  bg-black/40
+  flex
+  items-center
+  justify-center
+  z-50
+">
+
+  <motion.div
+
+    initial={{
+      opacity: 0,
+      scale: 0.9,
+    }}
+
+    animate={{
+      opacity: 1,
+      scale: 1,
+    }}
+
+    transition={{
+      duration: 0.3,
+    }}
+
+    className={`${darkMode ? "bg-[#1A0F0A]" : "bg-[#4A6666]"} w-[400px] rounded-3xl p-8 shadow-2xl`}
+  >
+
+    {/* HEADER */}
+
+    <div className="flex justify-between items-center mb-8">
+
+      <div>
+<h2 className={`text-3xl font-bold ${darkMode ? "text-[#F0A055]" : "text-white"}`}>
+  Admin Access
+</h2>
+
+
+<p className={`mt-1 ${darkMode ? "text-[#F0A055]/70" : "text-white"}`}>
+  Enter admin password
+</p>
+
+      </div>
+
+      <button
+  onClick={() => setShowAdminLogin(false)}
+  className={`w-10 h-10 rounded-full font-bold ${darkMode ? "bg-[#F0A055]/20 text-[#F0A055]" : "bg-gray-100 text-gray-600"}`}
+>
+  ×
+</button>
+
+    </div>
+
+    {/* PASSWORD */}
+
+    <div className="mb-8">
+
+    <label className={`block text-sm font-semibold mb-3 ${darkMode ? "text-[#F0A055]" : "text-white"}`}>
+  Password
+</label>
+
+<input
+  type="password"
+  placeholder="Enter Password"
+  value={adminPassword}
+  onChange={(e) => setAdminPassword(e.target.value)}
+  className={`w-full border rounded-2xl p-4 outline-none ${darkMode ? "bg-[#1A0F0A] border-[#F0A055]/40 text-[#F0A055] placeholder-[#F0A055]/40 focus:border-[#F0A055]" : "border-gray-300 focus:border-white"}`}
+/>
+
+    </div>
+
+    {/* LOGIN BUTTON */}
+
+    <button
+
+      onClick={() => {
+
+        if (adminPassword === "admin123") {
+
+          setShowAdminLogin(false);
+
+          setShowAdmin(true);
+
+          setAdminPassword("");
+
+        } else {
+
+          alert("Incorrect Password");
+
+        }
+
+      }}
+
+      className={`w-full ${darkMode ? "bg-[#F0A055] text-black" : "bg-white text-black"} py-4 rounded-2xl font-semibold hover:opacity-90 transition-all`}
+    >
+      Login
+    </button>
+
+  </motion.div>
+
+</div>
+
+)}
+
+{/* ADMIN WINDOW */}
+
+{showAdmin && (
+
+<div className="
+  fixed
+  inset-0
+  bg-black/40
+  flex
+  items-center
+  justify-center
+  z-50
+">
+
+  <motion.div
+
+    initial={{
+      opacity: 0,
+      scale: 0.9,
+    }}
+
+    animate={{
+      opacity: 1,
+      scale: 1,
+    }}
+
+    transition={{
+      duration: 0.3,
+    }}
+
+    className={`${darkMode ? "bg-[#1A0F0A]" : "bg-[#4A6666]"} w-[600px] max-h-[80vh] overflow-y-auto rounded-3xl p-8 shadow-2xl`}
+  >
+
+    {/* HEADER */}
+
+<div className="flex justify-between items-center mb-8">
+
+<div>
+
+  <h2 className={`text-3xl font-bold ${darkMode ? "text-[#F0A055]" : "text-white"}`}>
+    Admin Dashboard
+  </h2>
+
+  <p className={`mt-1 ${darkMode ? "text-[#F0A055]/70" : "text-white"}`}>
+    Active reservations
+  </p>
+
+</div>
+
+<button
+  onClick={() => setShowAdmin(false)}
+  className={`w-10 h-10 rounded-full font-bold ${darkMode ? "bg-[#F0A055]/20 text-[#F0A055]" : "bg-gray-100 text-gray-600"}`}
+>
+  ×
+</button>
+
+    </div>
+
+    {/* RESERVATIONS */}
+
+<div className="space-y-5">
+
+{bookings &&
+Object.keys(bookings).length > 0 ? (
+
+  Object.entries(bookings).map(
+    ([slotKey, booking]) => (
+
+      <div
+        key={slotKey}
+        className={`border rounded-3xl p-6 ${darkMode ? "border-[#F0A055]/30 bg-[#F0A055]/5" : "border-gray-200"}`}
+      >
+
+<div className="flex justify-between items-start">
+
+<div>
+
+  <h3 className={`text-2xl font-bold ${darkMode ? "text-[#F0A055]" : "text-white"}`}>
+    {slotKey.toUpperCase()}
+  </h3>
+
+<p className={`mt-2 ${darkMode ? "text-[#F0A055]/70" : "text-white/70"}`}>
+  Vehicle Number
+</p>
+
+<p className={`text-xl font-semibold mt-1 ${darkMode ? "text-[#F0A055]" : "text-white"}`}>
+  {booking.vehicle}
+</p>
+
+                </div>
+
+                <button
+
+                  onClick={async () => {
+
+                    await remove(
+                      ref(db, `bookings/${slotKey}`)
+                    );
+
+                    alert(
+                      "Vehicle Checked-In"
+                    );
+
+                  }}
+
+                  className={`${darkMode ? "bg-[#F0A055] text-black" : "bg-white text-[#4A6666]"} px-5 py-3 rounded-2xl font-semibold`}
+                >
+                  Check-In
+                </button>
+
+              </div>
+
+            </div>
+
+          )
+        )
+
+      ) : (
+
+        <div className={`h-[250px] flex items-center justify-center border-2 border-dashed rounded-3xl ${darkMode ? "text-[#F0A055]/50 border-[#F0A055]/20" : "text-gray-400 border-gray-200"}`}>
+  No active reservations
+</div>
+
+      )}
+
+    </div>
+
+  </motion.div>
+
+</div>
+
+)}
+
+{showAbout && (
+  <div
+    className="fixed inset-0 bg-black/40 flex items-center justify-center z-[60]"
+    onClick={() => setShowAbout(false)}
+  >
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.3 }}
+      onClick={(e) => e.stopPropagation()}
+      className={`${
+        darkMode ? "bg-[#1A0F0A]" : "bg-white"
+      } w-[520px] max-w-[90vw] rounded-3xl p-8 shadow-2xl`}
+    >
+      <div className="flex justify-between items-start mb-6">
+        <div>
+          <h2 className={`text-3xl font-bold ${darkMode ? "text-[#F0A055]" : "text-[#4A6666]"}`}>
+            About Smart Parking
+          </h2>
+          <p className={`mt-2 text-sm ${darkMode ? "text-[#F0A055]/70" : "text-gray-500"}`}>
+            Real-time parking management made simple
+          </p>
+        </div>
+
+        <button
+          onClick={() => setShowAbout(false)}
+          className={`w-10 h-10 rounded-full font-bold ${
+            darkMode ? "bg-[#F0A055]/20 text-[#F0A055]" : "bg-gray-100 text-gray-600"
+          }`}
+        >
+          ×
+        </button>
+      </div>
+
+      <p className={`leading-7 mb-6 ${darkMode ? "text-white/80" : "text-gray-700"}`}>
+        Smart Parking is a real-time parking dashboard that helps users monitor slot availability,
+        reserve parking spaces, and track occupancy through live sensor data and analytics.
+      </p>
+
+      <div className="space-y-3 mb-6">
+        {[
+          "Live parking slot monitoring",
+          "Slot booking and reservations",
+          "Occupancy analytics and peak-hour insights",
+          "Admin control for reservations",
+          "VIKI AI assistant for smart guidance",
+        ].map((item) => (
+          <div
+            key={item}
+            className={`flex items-center gap-3 p-3 rounded-2xl ${
+              darkMode ? "bg-white/5 text-white/80" : "bg-gray-50 text-gray-700"
+            }`}
+          >
+            <Sparkles size={16} className="text-[#F0A055]" />
+            <span>{item}</span>
+          </div>
+        ))}
+      </div>
+
+      <div
+        className={`text-sm rounded-2xl p-4 ${
+          darkMode ? "bg-white/5 text-white/60" : "bg-gray-50 text-gray-600"
+        }`}
+      >
+        Built with React, Firebase Realtime Database, Recharts, Framer Motion, and Lucide Icons.
+      </div>
+    </motion.div>
+  </div>
+)}
+
+{showTicTacToe && (
+  <div
+    className="fixed inset-0 bg-black/40 flex items-center justify-center z-[60]"
+    onClick={() => setShowTicTacToe(false)}
+  >
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.3 }}
+      onClick={(e) => e.stopPropagation()}
+      className={`${darkMode ? "bg-[#1A0F0A]" : "bg-white"} w-[420px] max-w-[92vw] rounded-3xl p-6 shadow-2xl`}
+    >
+      <div className="flex justify-between items-start mb-5">
+        <div>
+          <h2 className={`text-3xl font-bold ${darkMode ? "text-[#F0A055]" : "text-[#4A6666]"}`}>
+            Play with VIKI
+          </h2>
+          <p className={`mt-2 text-sm ${darkMode ? "text-[#F0A055]/70" : "text-gray-500"}`}>
+            Tic Tac Toe
+          </p>
+        </div>
+
+        <button
+          onClick={() => setShowTicTacToe(false)}
+          className={`w-10 h-10 rounded-full font-bold ${
+            darkMode ? "bg-[#F0A055]/20 text-[#F0A055]" : "bg-gray-100 text-gray-600"
+          }`}
+        >
+          ×
+        </button>
+      </div>
+
+      <TicTacToeGame darkMode={darkMode} />
+    </motion.div>
+  </div>
+)}
+    </div>
+
+  );
+}
+
+function TicTacToeGame({ darkMode }) {
+  const [board, setBoard] = useState(Array(9).fill(null));
+  const [vikiTurn, setVikiTurn] = useState(false);
+
+  const winner = calculateWinner(board);
+  const isDraw = !winner && board.every(Boolean);
+
+  const handleClick = (i) => {
+    if (board[i] || winner || vikiTurn) return;
+
+    const next = [...board];
+    next[i] = "X";
+    setBoard(next);
+    setVikiTurn(true);
+
+    setTimeout(() => {
+      setBoard((prev) => {
+        if (calculateWinner(prev) || prev.every(Boolean)) return prev;
+        const move = getSmartMove(prev);
+        if (move === -1) return prev;
+        const updated = [...prev];
+        updated[move] = "O";
+        return updated;
+      });
+      setVikiTurn(false);
+    }, 400);
+  };
+
+  const resetGame = () => {
+    setBoard(Array(9).fill(null));
+    setVikiTurn(false);
+  };
+
+  const status = winner
+    ? `Winner: ${winner === "X" ? "You" : "VIKI"}`
+    : isDraw
+    ? "It's a draw"
+    : vikiTurn
+    ? "VIKI is thinking..."
+    : "Your turn: X";
+
+  return (
+    <div>
+      <div className={`mb-4 font-semibold ${darkMode ? "text-white" : "text-gray-700"}`}>
+        {status}
+      </div>
+
+      <div className="grid grid-cols-3 gap-3">
+        {board.map((cell, i) => (
+          <button
+            key={i}
+            onClick={() => handleClick(i)}
+            className={`h-24 rounded-2xl text-3xl font-bold border transition-all ${
+              darkMode
+                ? "bg-white/5 border-[#F0A055]/20 text-[#F0A055] hover:bg-white/10"
+                : "bg-gray-50 border-gray-200 text-[#4A6666] hover:bg-gray-100"
+            }`}
+          >
+            {cell}
+          </button>
+        ))}
+      </div>
+
+      <button
+        onClick={resetGame}
+        className={`mt-5 w-full py-3 rounded-2xl font-semibold ${
+          darkMode ? "bg-[#F0A055] text-black" : "bg-[#4A6666] text-white"
+        }`}
+      >
+        Restart Game
+      </button>
+    </div>
+  );
+}
+
+function getSmartMove(board) {
+  const lines = [
+    [0, 1, 2], [3, 4, 5], [6, 7, 8],
+    [0, 3, 6], [1, 4, 7], [2, 5, 8],
+    [0, 4, 8], [2, 4, 6],
+  ];
+
+  for (const [a, b, c] of lines) {
+    const line = [board[a], board[b], board[c]];
+    if (line.filter((v) => v === "O").length === 2 && line.includes(null)) {
+      return [a, b, c][line.indexOf(null)];
+    }
+  }
+
+  for (const [a, b, c] of lines) {
+    const line = [board[a], board[b], board[c]];
+    if (line.filter((v) => v === "X").length === 2 && line.includes(null)) {
+      return [a, b, c][line.indexOf(null)];
+    }
+  }
+
+  if (!board[4]) return 4;
+
+  const corners = [0, 2, 6, 8].filter((i) => !board[i]);
+  if (corners.length) return corners[Math.floor(Math.random() * corners.length)];
+
+  const sides = [1, 3, 5, 7].filter((i) => !board[i]);
+  if (sides.length) return sides[Math.floor(Math.random() * sides.length)];
+
+  return -1;
+}
+
+function calculateWinner(squares) {
+  const lines = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6],
+  ];
+
+  for (const [a, b, c] of lines) {
+    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+      return squares[a];
+    }
+  }
+  return null;
+}
+
+export default App;
