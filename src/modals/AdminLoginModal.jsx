@@ -1,9 +1,13 @@
 import { motion } from "framer-motion";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../firebase/config";
 
 function AdminLoginModal({
   showAdminLogin,
   setShowAdminLogin,
   darkMode,
+  adminEmail,
+  setAdminEmail,
   adminPassword,
   setAdminPassword,
   setShowAdmin,
@@ -25,7 +29,7 @@ function AdminLoginModal({
               Admin Access
             </h2>
             <p className={`mt-1 ${darkMode ? "text-[#F0A055]/70" : "text-white"}`}>
-              Enter admin password
+              Enter admin credentials
             </p>
           </div>
           <button
@@ -34,6 +38,20 @@ function AdminLoginModal({
           >
             ×
           </button>
+        </div>
+
+        {/* EMAIL */}
+        <div className="mb-4">
+          <label className={`block text-sm font-semibold mb-3 ${darkMode ? "text-[#F0A055]" : "text-white"}`}>
+            Email
+          </label>
+          <input
+            type="email"
+            placeholder="admin@smartparking.com"
+            value={adminEmail}
+            onChange={(e) => setAdminEmail(e.target.value)}
+            className={`w-full border rounded-2xl p-4 outline-none ${darkMode ? "bg-[#1A0F0A] border-[#F0A055]/40 text-[#F0A055] placeholder-[#F0A055]/40 focus:border-[#F0A055]" : "border-gray-300 focus:border-white"}`}
+          />
         </div>
 
         {/* PASSWORD */}
@@ -52,19 +70,22 @@ function AdminLoginModal({
 
         {/* LOGIN BUTTON */}
         <button
-          onClick={() => {
-            if (adminPassword === "admin123") {
+          onClick={async () => {
+            try {
+              await signInWithEmailAndPassword(auth, adminEmail, adminPassword);
               setShowAdminLogin(false);
               setShowAdmin(true);
+              setAdminEmail("");
               setAdminPassword("");
-            } else {
-              alert("Incorrect Password");
+            } catch (error) {
+              alert("Incorrect email or password");
             }
           }}
           className={`w-full ${darkMode ? "bg-[#F0A055] text-black" : "bg-white text-black"} py-4 rounded-2xl font-semibold hover:opacity-90 transition-all`}
         >
           Login
         </button>
+
       </motion.div>
     </div>
   );

@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { ref, remove } from "firebase/database";
-import { db } from "../firebase/config";
+import { db, auth } from "../firebase/config";
+import { signOut } from "firebase/auth";
 
 function AdminModal({ showAdmin, setShowAdmin, darkMode, bookings }) {
   if (!showAdmin) return null;
@@ -23,12 +24,23 @@ function AdminModal({ showAdmin, setShowAdmin, darkMode, bookings }) {
               Active reservations
             </p>
           </div>
-          <button
-            onClick={() => setShowAdmin(false)}
-            className={`w-10 h-10 rounded-full font-bold ${darkMode ? "bg-[#F0A055]/20 text-[#F0A055]" : "bg-gray-100 text-gray-600"}`}
-          >
-            ×
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={async () => {
+                await signOut(auth);
+                setShowAdmin(false);
+              }}
+              className={`px-4 py-2 rounded-2xl font-semibold text-sm ${darkMode ? "bg-red-500/20 text-red-400" : "bg-red-100 text-red-500"}`}
+            >
+              Logout
+            </button>
+            <button
+              onClick={() => setShowAdmin(false)}
+              className={`w-10 h-10 rounded-full font-bold ${darkMode ? "bg-[#F0A055]/20 text-[#F0A055]" : "bg-gray-100 text-gray-600"}`}
+            >
+              ×
+            </button>
+          </div>
         </div>
 
         {/* RESERVATIONS */}

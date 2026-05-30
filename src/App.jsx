@@ -8,6 +8,7 @@ import AnalyticsModal from "./modals/AnalyticsModal";
 import AdminLoginModal from "./modals/AdminLoginModal";
 import AdminModal from "./modals/AdminModal";
 import { ref, onValue, set, remove } from "firebase/database";
+import { auth } from "./firebase/config";
 import {
   Gamepad2,
   UserCog,
@@ -34,6 +35,8 @@ const [showBooking, setShowBooking] = useState(false);
 const [showAnalytics, setShowAnalytics] = useState(false);
 
 const [analyticsData, setAnalyticsData] = useState([]);
+
+const [adminEmail, setAdminEmail] = useState("");
 
 const [showAdmin, setShowAdmin] = useState(false);
 
@@ -398,7 +401,13 @@ useEffect(() => {
 
             <div
 
-onClick={() => setShowAdminLogin(true)}
+onClick={() => {
+  if (auth.currentUser) {
+    setShowAdmin(true);
+  } else {
+    setShowAdminLogin(true);
+  }
+}}
 
   className="
     hover:bg-white/10
@@ -722,6 +731,8 @@ className={`
   showAdminLogin={showAdminLogin}
   setShowAdminLogin={setShowAdminLogin}
   darkMode={darkMode}
+  adminEmail={adminEmail}
+  setAdminEmail={setAdminEmail}
   adminPassword={adminPassword}
   setAdminPassword={setAdminPassword}
   setShowAdmin={setShowAdmin}
