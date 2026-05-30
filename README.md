@@ -1,16 +1,93 @@
-# React + Vite
+# 🅿️ Smart Parking System
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A real-time smart parking management system built with React and Firebase, featuring live sensor integration, slot booking, analytics, and an AI assistant.
 
-Currently, two official plugins are available:
+🔗 **Live Demo:** https://smart-parking-system-ten-omega.vercel.app/
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## 🚀 Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- 📡 **Real-time slot monitoring** via ESP32 sensors and Firebase Realtime Database
+- 🅿️ **Slot booking system** with vehicle registration
+- 📊 **Analytics dashboard** with occupancy trends and peak hour charts
+- 🔐 **Admin panel** protected by Firebase Authentication
+- 🤖 **VIKI Assistant** — AI-powered parking guide
+- 🎮 **Tic Tac Toe** mini game
+- 🌙 **Dark mode** support
+- ⚡ **CI/CD pipeline** with GitHub Actions
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | React, Vite, Tailwind CSS |
+| Backend | Firebase Realtime Database |
+| Auth | Firebase Authentication |
+| Charts | Recharts |
+| Animation | Framer Motion |
+| IoT | ESP32 + Arduino |
+| CI/CD | GitHub Actions |
+| Deployment | Vercel |
+
+---
+
+## 📁 Project Structure
+src/
+├── components/
+│   ├── VikiAssistant.jsx
+│   └── TicTacToe.jsx
+├── modals/
+│   ├── BookingModal.jsx
+│   ├── AnalyticsModal.jsx
+│   ├── AdminLoginModal.jsx
+│   ├── AdminModal.jsx
+│   └── AboutModal.jsx
+├── firebase/
+│   └── config.js
+└── App.jsx
+
+---
+
+## ⚙️ Setup & Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/abhinavbr-dev/smart-parking-system.git
+
+# Install dependencies
+cd smart-parking-system
+npm install
+
+# Start development server
+npm run dev
+```
+
+---
+
+## 🔧 Environment
+
+Create a Firebase project and update `src/firebase/config.js` with your credentials.
+
+---
+
+## 📡 Hardware
+
+- ESP32 microcontroller
+- IR/Ultrasonic sensors per parking slot
+- Sensors push data to Firebase Realtime Database
+
+---
+
+## 👤 Author
+
+**Abhinav BR**
+- GitHub: [@abhinavbr-dev](https://github.com/abhinavbr-dev)
+
+---
+
+## 📄 License
+
+MIT License
