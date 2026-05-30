@@ -3,22 +3,19 @@ import { db } from "./firebase/config";
 import AboutModal from "./modals/AboutModal";
 import TicTacToeGame from "./components/TicTacToe";
 import VikiAssistant from "./components/VikiAssistant";
+import BookingModal from "./modals/BookingModal";
+import AnalyticsModal from "./modals/AnalyticsModal";
+import AdminLoginModal from "./modals/AdminLoginModal";
 import { ref, onValue, set, remove } from "firebase/database";
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, } from "recharts";
 import {
-  Sparkles,
   Gamepad2,
   UserCog,
   LayoutDashboard,
   ParkingCircle,
   BarChart3,
-  History,
-  Settings,
   Info,
   CarFront,
   CircleParking,
-  FlaskConical,
-  Brain,
 } from "lucide-react";
 
 import { motion } from "framer-motion";
@@ -712,378 +709,30 @@ className={`
   recommendedSlot={recommendedSlot}
 />
 
-{/* ANALYTICS WINDOW */}
-
-{showAnalytics && (
-<div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-  <motion.div
-    initial={{ opacity: 0, scale: 0.9 }}
-    animate={{ opacity: 1, scale: 1 }}
-    transition={{ duration: 0.3 }}
-    className={`${darkMode ? "bg-[#1A0F0A]" : "bg-white"} w-[800px] max-h-[85vh] overflow-y-auto rounded-3xl p-8 shadow-2xl`}
-  >
-
-    {/* HEADER */}
-    <div className="flex justify-between items-center mb-8">
-      <div>
-        <h2 className={`text-3xl font-bold ${darkMode ? "text-[#F0A055]" : "text-[#4A6666]"}`}>
-          Analytics
-        </h2>
-        <p className={`mt-1 ${darkMode ? "text-[#F0A055]/70" : "text-gray-500"}`}>
-          Last 7 days overview
-        </p>
-      </div>
-      <button
-        onClick={() => setShowAnalytics(false)}
-        className={`w-10 h-10 rounded-full font-bold ${darkMode ? "bg-[#F0A055]/20 text-[#F0A055]" : "bg-gray-100 text-gray-600"}`}
-      >
-        ×
-      </button>
-    </div>
-
-    {/* OCCUPANCY OVER TIME */}
-    <div className={`rounded-3xl p-6 mb-6 ${darkMode ? "bg-[#F0A055]/5 border border-[#F0A055]/20" : "bg-gray-50"}`}>
-      <h3 className={`text-xl font-bold mb-4 ${darkMode ? "text-[#F0A055]" : "text-[#4A6666]"}`}>
-        Occupancy % Over Time
-      </h3>
-      <ResponsiveContainer width="100%" height={200}>
-        <LineChart data={analyticsData}>
-          <XAxis dataKey="date" stroke={darkMode ? "#F0A055" : "#4A6666"} tick={{ fontSize: 11 }} />
-          <YAxis stroke={darkMode ? "#F0A055" : "#4A6666"} tick={{ fontSize: 11 }} />
-          <Tooltip contentStyle={{ background: darkMode ? "#1A0F0A" : "white", border: "none", borderRadius: "12px" }} />
-          <Line type="monotone" dataKey="occupancy" stroke={darkMode ? "#F0A055" : "#4A6666"} strokeWidth={2} dot={false} />
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
-
-    {/* PEAK HOURS */}
-    <div className={`rounded-3xl p-6 mb-6 ${darkMode ? "bg-[#F0A055]/5 border border-[#F0A055]/20" : "bg-gray-50"}`}>
-      <h3 className={`text-xl font-bold mb-4 ${darkMode ? "text-[#F0A055]" : "text-[#4A6666]"}`}>
-        Peak Hours
-      </h3>
-      <ResponsiveContainer width="100%" height={200}>
-        <BarChart data={
-          Array.from({ length: 24 }, (_, i) => ({
-            hour: `${i}:00`,
-            count: analyticsData.filter(d => d.hour === i).length
-          }))
-        }>
-          <XAxis dataKey="hour" stroke={darkMode ? "#F0A055" : "#4A6666"} tick={{ fontSize: 10 }} />
-          <YAxis stroke={darkMode ? "#F0A055" : "#4A6666"} tick={{ fontSize: 11 }} />
-          <Tooltip contentStyle={{ background: darkMode ? "#1A0F0A" : "white", border: "none", borderRadius: "12px" }} />
-          <Bar dataKey="count" fill={darkMode ? "#F0A055" : "#4A6666"} radius={[6, 6, 0, 0]} />
-        </BarChart>
-      </ResponsiveContainer>
-    </div>
-
-    {/* TOTAL VEHICLES PER DAY */}
-    <div className={`rounded-3xl p-6 ${darkMode ? "bg-[#F0A055]/5 border border-[#F0A055]/20" : "bg-gray-50"}`}>
-      <h3 className={`text-xl font-bold mb-4 ${darkMode ? "text-[#F0A055]" : "text-[#4A6666]"}`}>
-        Total Vehicles Per Day
-      </h3>
-      <ResponsiveContainer width="100%" height={200}>
-        <BarChart data={
-          [...new Set(analyticsData.map(d => d.date))].map(date => ({
-            date,
-            vehicles: analyticsData.filter(d => d.date === date && d.occupied > 0).length
-          }))
-        }>
-          <XAxis dataKey="date" stroke={darkMode ? "#F0A055" : "#4A6666"} tick={{ fontSize: 11 }} />
-          <YAxis stroke={darkMode ? "#F0A055" : "#4A6666"} tick={{ fontSize: 11 }} />
-          <Tooltip contentStyle={{ background: darkMode ? "#1A0F0A" : "white", border: "none", borderRadius: "12px" }} />
-          <Bar dataKey="vehicles" fill={darkMode ? "#C4622D" : "#7A9A9A"} radius={[6, 6, 0, 0]} />
-        </BarChart>
-      </ResponsiveContainer>
-    </div>
-
-  </motion.div>
-</div>
-)}
-
-{/* BOOKING WINDOW */}
-
-{showBooking && (
-
-<div className="
-  fixed
-  inset-0
-  bg-black/40
-  flex
-  items-center
-  justify-center
-  z-50
-">
-
-  <motion.div
-
-    initial={{
-      opacity: 0,
-      scale: 0.9,
-    }}
-
-    animate={{
-      opacity: 1,
-      scale: 1,
-    }}
-
-    transition={{
-      duration: 0.3,
-    }}
-
-    className={`
-  ${darkMode ? "bg-[#1A0F0A]" : "bg-white"}
-  w-[450px]
-  rounded-3xl
-  p-8
-  shadow-2xl
-`}
-  >
-
-    {/* HEADER */}
-
-    <div className="flex justify-between items-center mb-8">
-
-      <div>
-
-      <h2 className={`text-3xl font-bold ${darkMode ? "text-[#F0A055]" : "text-[#4A6666]"}`}>
-  Slot Booking
-</h2>
-
-<p className={`mt-1 ${darkMode ? "text-[#F0A055]/70" : "text-gray-500"}`}>
-  Reserve your preferred parking slot
-</p>
-
-      </div>
-
-      <button
-  onClick={() => setShowBooking(false)}
-  className={`w-10 h-10 rounded-full font-bold ${darkMode ? "bg-[#F0A055]/20 text-[#F0A055]" : "bg-gray-100 text-gray-600"}`}
->
-  ×
-</button>
-
-    </div>
-
-    {/* VEHICLE NUMBER */}
-
-<div className="mb-6">
-
-<label className={`block text-sm font-semibold mb-3 ${darkMode ? "text-[#F0A055]" : "text-gray-600"}`}>
-  Vehicle Number
-</label>
-
-<input
-  type="text"
-  placeholder="KL 11 AB 1234"
-  value={bookingData.vehicle}
-  onChange={(e) =>
-    setBookingData({
-      ...bookingData,
-      vehicle: e.target.value,
-    })
-  }
-  className={`w-full border rounded-2xl p-4 outline-none ${darkMode ? "bg-[#1A0F0A] border-[#F0A055]/40 text-[#F0A055] placeholder-[#F0A055]/40 focus:border-[#F0A055]" : "border-gray-300 focus:border-[#4A6666]"}`}
+<AnalyticsModal
+  showAnalytics={showAnalytics}
+  setShowAnalytics={setShowAnalytics}
+  darkMode={darkMode}
+  analyticsData={analyticsData}
 />
 
-</div>
-
-   {/* SLOT SELECT */}
-
-<div className="mb-8">
-
-<label className={`block text-sm font-semibold mb-3 ${darkMode ? "text-[#F0A055]" : "text-[gray-600]"}`}>
-  Preferred Slot
-</label>
-
-<select
-  value={bookingData.slot}
-  onChange={(e) =>
-    setBookingData({
-      ...bookingData,
-      slot: e.target.value,
-    })
-  }
-  className={`w-full border rounded-2xl p-4 outline-none ${darkMode ? "bg-[#1A0F0A] border-[#F0A055]/40 text-[#F0A055] focus:border-[#F0A055]" : "border-gray-300 focus:border-[#4A6666]"}`}
->
-
-  <option value="">
-    Select Available Slot
-  </option>
-
-  {availableSlots.map((slot) => (
-
-    <option
-      key={slot.id}
-      value={slot.id}
-    >
-      Slot {slot.id}
-    </option>
-
-  ))}
-
-</select>
-
-</div>
-
-    {/* BOOK BUTTON */}
-
-    <button
-
-      onClick={async () => {
-
-        if (
-          !bookingData.vehicle ||
-          !bookingData.slot
-        ) {
-
-          alert("Please fill all fields");
-          return;
-
-        }
-
-        await set(
-          ref(
-            db,
-            `bookings/slot${bookingData.slot}`
-          ),
-          {
-            vehicle: bookingData.vehicle,
-            slot: bookingData.slot,
-            bookedAt:
-              new Date().toLocaleTimeString(),
-          }
-        );
-
-        alert("Slot Reserved Successfully");
-
-        setBookingData({
-          vehicle: "",
-          slot: "",
-        });
-
-        setShowBooking(false);
-
-      }}
-
-      className={`w-full ${darkMode ? "bg-[#F0A055] text-black" : "bg-[#4A6666] text-white"} py-4 rounded-2xl font-semibold hover:opacity-90 transition-all`}
-    >
-      Reserve Slot
-    </button>
-
-  </motion.div>
-
-</div>
-
-)}
-
-{/* ADMIN LOGIN WINDOW */}
-
-{showAdminLogin && (
-
-<div className="
-  fixed
-  inset-0
-  bg-black/40
-  flex
-  items-center
-  justify-center
-  z-50
-">
-
-  <motion.div
-
-    initial={{
-      opacity: 0,
-      scale: 0.9,
-    }}
-
-    animate={{
-      opacity: 1,
-      scale: 1,
-    }}
-
-    transition={{
-      duration: 0.3,
-    }}
-
-    className={`${darkMode ? "bg-[#1A0F0A]" : "bg-[#4A6666]"} w-[400px] rounded-3xl p-8 shadow-2xl`}
-  >
-
-    {/* HEADER */}
-
-    <div className="flex justify-between items-center mb-8">
-
-      <div>
-<h2 className={`text-3xl font-bold ${darkMode ? "text-[#F0A055]" : "text-white"}`}>
-  Admin Access
-</h2>
-
-
-<p className={`mt-1 ${darkMode ? "text-[#F0A055]/70" : "text-white"}`}>
-  Enter admin password
-</p>
-
-      </div>
-
-      <button
-  onClick={() => setShowAdminLogin(false)}
-  className={`w-10 h-10 rounded-full font-bold ${darkMode ? "bg-[#F0A055]/20 text-[#F0A055]" : "bg-gray-100 text-gray-600"}`}
->
-  ×
-</button>
-
-    </div>
-
-    {/* PASSWORD */}
-
-    <div className="mb-8">
-
-    <label className={`block text-sm font-semibold mb-3 ${darkMode ? "text-[#F0A055]" : "text-white"}`}>
-  Password
-</label>
-
-<input
-  type="password"
-  placeholder="Enter Password"
-  value={adminPassword}
-  onChange={(e) => setAdminPassword(e.target.value)}
-  className={`w-full border rounded-2xl p-4 outline-none ${darkMode ? "bg-[#1A0F0A] border-[#F0A055]/40 text-[#F0A055] placeholder-[#F0A055]/40 focus:border-[#F0A055]" : "border-gray-300 focus:border-white"}`}
+<BookingModal
+  showBooking={showBooking}
+  setShowBooking={setShowBooking}
+  darkMode={darkMode}
+  bookingData={bookingData}
+  setBookingData={setBookingData}
+  availableSlots={availableSlots}
 />
 
-    </div>
-
-    {/* LOGIN BUTTON */}
-
-    <button
-
-      onClick={() => {
-
-        if (adminPassword === "admin123") {
-
-          setShowAdminLogin(false);
-
-          setShowAdmin(true);
-
-          setAdminPassword("");
-
-        } else {
-
-          alert("Incorrect Password");
-
-        }
-
-      }}
-
-      className={`w-full ${darkMode ? "bg-[#F0A055] text-black" : "bg-white text-black"} py-4 rounded-2xl font-semibold hover:opacity-90 transition-all`}
-    >
-      Login
-    </button>
-
-  </motion.div>
-
-</div>
-
-)}
+<AdminLoginModal
+  showAdminLogin={showAdminLogin}
+  setShowAdminLogin={setShowAdminLogin}
+  darkMode={darkMode}
+  adminPassword={adminPassword}
+  setAdminPassword={setAdminPassword}
+  setShowAdmin={setShowAdmin}
+/>
 
 {/* ADMIN WINDOW */}
 
