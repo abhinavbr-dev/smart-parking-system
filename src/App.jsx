@@ -52,37 +52,29 @@ const [bookingData, setBookingData] = useState({
 
 const [bookings, setBookings] = useState({});
 
-  useEffect(() => {
+useEffect(() => {
+  const parkingRef = ref(db, "parking");
 
-    const parkingRef = ref(db, "parking");
+  onValue(parkingRef, (snapshot) => {
+    const data = snapshot.val();
 
-    onValue(parkingRef, (snapshot) => {
+    if (data) {
+      setSlots(data);
 
-      const data = snapshot.val();
+      const occupiedCount = Object.values(data).filter(v => v === 1).length;
+      const total = Object.keys(data).length;
+      const occupancyPercent = Math.round((occupiedCount / total) * 100);
 
-      if (data) {
-        setSlots(data);
-        if (data) {
-          setSlots(data);
-          
-          // SAVE ANALYTICS
-          const occupiedCount = Object.values(data).filter(v => v === 1).length;
-          const total = Object.keys(data).length;
-          const occupancyPercent = Math.round((occupiedCount / total) * 100);
-          
-          set(ref(db, `analytics/${Date.now()}`), {
-            occupancy: occupancyPercent,
-            occupied: occupiedCount,
-            timestamp: new Date().toISOString(),
-            hour: new Date().getHours(),
-            date: new Date().toLocaleDateString("en-GB"),
-          });
-        }
-      }
-
-    });
-
-  }, []);
+      set(ref(db, `analytics/${Date.now()}`), {
+        occupancy: occupancyPercent,
+        occupied: occupiedCount,
+        timestamp: new Date().toISOString(),
+        hour: new Date().getHours(),
+        date: new Date().toLocaleDateString("en-GB"),
+      });
+    }
+  });
+}, []);
 
   useEffect(() => {
 
