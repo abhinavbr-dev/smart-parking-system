@@ -7,7 +7,7 @@ import BookingModal from "./modals/BookingModal";
 import AnalyticsModal from "./modals/AnalyticsModal";
 import AdminLoginModal from "./modals/AdminLoginModal";
 import AdminModal from "./modals/AdminModal";
-import { ref, onValue, set, remove } from "firebase/database";
+import { ref, onValue, set } from "firebase/database";
 import { auth } from "./firebase/config";
 import {
   Gamepad2,

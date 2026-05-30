@@ -77,7 +77,7 @@ function AdminLoginModal({
               setShowAdmin(true);
               setAdminEmail("");
               setAdminPassword("");
-            } catch (error) {
+            } catch {
               alert("Incorrect email or password");
             }
           }}
