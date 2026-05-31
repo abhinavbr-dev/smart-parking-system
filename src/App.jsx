@@ -75,15 +75,13 @@ useEffect(() => {
         const total = Object.keys(data).length;
         const occupancyPercent = Math.round((occupiedCount / total) * 100);
 
-        if (occupancyPercent > 0) {
-          set(ref(db, `analytics/${Date.now()}`), {
-            occupancy: occupancyPercent,
-            occupied: occupiedCount,
-            timestamp: new Date().toISOString(),
-            hour: new Date().getHours(),
-            date: new Date().toLocaleDateString("en-GB"),
-          });
-        }
+        set(ref(db, `analytics/${Date.now()}`), {
+          occupancy: occupancyPercent,
+          occupied: occupiedCount,
+          timestamp: new Date().toISOString(),
+          hour: new Date().getHours(),
+          date: new Date().toLocaleDateString("en-GB"),
+        });
       }
     }
   });

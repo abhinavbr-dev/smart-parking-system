@@ -41,17 +41,26 @@ function AnalyticsModal({ showAnalytics, setShowAnalytics, darkMode, analyticsDa
           </h3>
           <ResponsiveContainer width="100%" height={200}>
             <LineChart data={analyticsData}>
-              <XAxis dataKey="date" stroke={darkMode ? "#F0A055" : "#4A6666"} tick={{ fontSize: 11 }} />
+              <XAxis 
+                dataKey="timestamp" 
+                stroke={darkMode ? "#F0A055" : "#4A6666"} 
+                tick={{ fontSize: 11 }}
+                tickFormatter={(val) => new Date(val).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              />
               <YAxis stroke={darkMode ? "#F0A055" : "#4A6666"} tick={{ fontSize: 11 }} />
-              <Tooltip contentStyle={{ background: darkMode ? "#1A0F0A" : "white", border: "none", borderRadius: "12px" }} />
-              <Line 
-  type="monotone" 
-  dataKey="occupancy" 
-  stroke={darkMode ? "#F0A055" : "#4A6666"} 
-  strokeWidth={2} 
-  dot={false}
-  isAnimationActive={false}
-/>
+              <Tooltip 
+                contentStyle={{ background: darkMode ? "#1A0F0A" : "white", border: "none", borderRadius: "12px" }}
+                formatter={(value) => [`${value}%`, "Occupancy"]}
+                labelFormatter={(val) => new Date(val).toLocaleString()}
+              />
+              <Line
+                type="monotone"
+                dataKey="occupancy"
+                stroke={darkMode ? "#F0A055" : "#4A6666"}
+                strokeWidth={2}
+                dot={false}
+                isAnimationActive={false}
+              />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -70,7 +79,10 @@ function AnalyticsModal({ showAnalytics, setShowAnalytics, darkMode, analyticsDa
             }>
               <XAxis dataKey="hour" stroke={darkMode ? "#F0A055" : "#4A6666"} tick={{ fontSize: 10 }} />
               <YAxis stroke={darkMode ? "#F0A055" : "#4A6666"} tick={{ fontSize: 11 }} />
-              <Tooltip contentStyle={{ background: darkMode ? "#1A0F0A" : "white", border: "none", borderRadius: "12px" }} />
+              <Tooltip 
+                contentStyle={{ background: darkMode ? "#1A0F0A" : "white", border: "none", borderRadius: "12px" }}
+                formatter={(value) => [value, "Entries"]}
+              />
               <Bar dataKey="count" fill={darkMode ? "#F0A055" : "#4A6666"} radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -90,7 +102,10 @@ function AnalyticsModal({ showAnalytics, setShowAnalytics, darkMode, analyticsDa
             }>
               <XAxis dataKey="date" stroke={darkMode ? "#F0A055" : "#4A6666"} tick={{ fontSize: 11 }} />
               <YAxis stroke={darkMode ? "#F0A055" : "#4A6666"} tick={{ fontSize: 11 }} />
-              <Tooltip contentStyle={{ background: darkMode ? "#1A0F0A" : "white", border: "none", borderRadius: "12px" }} />
+              <Tooltip 
+                contentStyle={{ background: darkMode ? "#1A0F0A" : "white", border: "none", borderRadius: "12px" }}
+                formatter={(value) => [value, "Vehicles"]}
+              />
               <Bar dataKey="vehicles" fill={darkMode ? "#C4622D" : "#7A9A9A"} radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
