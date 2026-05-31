@@ -44,7 +44,14 @@ function AnalyticsModal({ showAnalytics, setShowAnalytics, darkMode, analyticsDa
               <XAxis dataKey="date" stroke={darkMode ? "#F0A055" : "#4A6666"} tick={{ fontSize: 11 }} />
               <YAxis stroke={darkMode ? "#F0A055" : "#4A6666"} tick={{ fontSize: 11 }} />
               <Tooltip contentStyle={{ background: darkMode ? "#1A0F0A" : "white", border: "none", borderRadius: "12px" }} />
-              <Line type="monotone" dataKey="occupancy" stroke={darkMode ? "#F0A055" : "#4A6666"} strokeWidth={2} dot={false} />
+              <Line 
+  type="monotone" 
+  dataKey="occupancy" 
+  stroke={darkMode ? "#F0A055" : "#4A6666"} 
+  strokeWidth={2} 
+  dot={false}
+  isAnimationActive={false}
+/>
             </LineChart>
           </ResponsiveContainer>
         </div>
