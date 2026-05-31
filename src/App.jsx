@@ -213,6 +213,17 @@ useEffect(() => {
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setSidebarOpen(false);
+      }
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
 
     <div className="h-screen flex overflow-hidden relative">
