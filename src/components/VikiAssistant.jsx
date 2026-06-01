@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { OrbitIcon } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 function VikiAssistant({ darkMode, recommendedSlot }) {
 
@@ -60,7 +60,7 @@ function VikiAssistant({ darkMode, recommendedSlot }) {
 
         {/* VIKI AI ICON */}
         <div className="min-w-[40px] h-[40px] md:min-w-[50px] md:h-[50px] rounded-2xl bg-white/10 flex items-center justify-center">
-          <OrbitIcon
+          <Sparkles
             size={20}
             className={`${darkMode ? "text-[#F0A055]" : "text-white"}`}
             strokeWidth={2.5}

@@ -11,6 +11,13 @@ import { ref, onValue, set } from "firebase/database";
 import { auth } from "./firebase/config";
 import {
   Gamepad2,
+  QrCode,
+  Mail,
+  ScanLine,
+  Clock3,
+  History,
+  Brain,
+  CreditCard,
   UserCog,
   LayoutDashboard,
   ParkingCircle,
@@ -18,6 +25,7 @@ import {
   Info,
   CarFront,
   CircleParking,
+  Crown,
 } from "lucide-react";
 
 import { motion } from "framer-motion";
@@ -47,6 +55,8 @@ const [showAbout, setShowAbout] = useState(false);
 const [showTicTacToe, setShowTicTacToe] = useState(false);
 
 const [adminPassword, setAdminPassword] = useState("");
+
+const [showPremium, setShowPremium] = useState(false);
 
 const [bookingData, setBookingData] = useState({
   vehicle: "",
@@ -382,8 +392,27 @@ useEffect(() => {
   )}
 </div>
 
+<div
+  onClick={() => setShowPremium(true)}
+  className={`
+    hover:bg-white/10
+    rounded-2xl
+    p-4
+    flex
+    items-center
+    cursor-pointer
+    transition-all
+    ${sidebarOpen ? "gap-4" : "justify-center"}
+  `}
+>
+  <Crown />
+  {sidebarOpen && (
+    <span className="font-semibold">
+      Try Premium
+    </span>
+  )}
+</div>
             
-
 <div
   onClick={() => setShowTicTacToe(true)}
   className={`
@@ -738,6 +767,101 @@ onClick={() => {
   setShowAbout={setShowAbout}
   darkMode={darkMode}
 />
+
+{showPremium && (
+  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[60]">
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.3 }}
+      className={`${
+        darkMode ? "bg-[#1A0F0A]" : "bg-white"
+      } w-[550px] rounded-3xl p-8 shadow-2xl`}
+    >
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h2
+            className={`text-3xl font-bold ${
+              darkMode ? "text-[#F0A055]" : "text-[#4A6666]"
+            }`}
+          >
+            Smart Parking Premium
+          </h2>
+
+          <p
+            className={`mt-2 ${
+              darkMode
+                ? "text-[#F0A055]/70"
+                : "text-gray-500"
+            }`}
+          >
+            Rodmap & Upcoming Premium Features
+          </p>
+        </div>
+
+        <button
+          onClick={() => setShowPremium(false)}
+          className="text-2xl font-bold"
+        >
+          ×
+        </button>
+      </div>
+
+      <div className="space-y-4">
+
+  <div className="p-4 rounded-2xl bg-yellow-500/10 flex items-center gap-3">
+    <QrCode size={20} />
+    <span>QR Code Generated After Booking</span>
+  </div>
+
+  <div className="p-4 rounded-2xl bg-yellow-500/10 flex items-center gap-3">
+    <Mail size={20} />
+    <span>Email Confirmation After Payment</span>
+  </div>
+
+  <div className="p-4 rounded-2xl bg-yellow-500/10 flex items-center gap-3">
+    <ScanLine size={20} />
+    <span>AI License Plate Recognition</span>
+  </div>
+
+  <div className="p-4 rounded-2xl bg-yellow-500/10 flex items-center gap-3">
+    <Clock3 size={20} />
+    <span>Parking Duration & Fee Calculation</span>
+  </div>
+
+  <div className="p-4 rounded-2xl bg-yellow-500/10 flex items-center gap-3">
+    <History size={20} />
+    <span>Complete Booking History</span>
+  </div>
+
+  <div className="p-4 rounded-2xl bg-yellow-500/10 flex items-center gap-3">
+    <Brain size={20} />
+    <span>AI Smart Slot Recommendation</span>
+  </div>
+
+  <div className="p-4 rounded-2xl bg-yellow-500/10 flex items-center gap-3">
+    <BarChart3 size={20} />
+    <span>Advanced Usage Analytics</span>
+  </div>
+
+  <div className="p-4 rounded-2xl bg-yellow-500/10 flex items-center gap-3">
+    <CreditCard size={20} />
+    <span>Automatic Exit Payment</span>
+  </div>
+
+</div>
+      <button
+        className={`w-full mt-8 py-4 rounded-2xl font-bold ${
+          darkMode
+            ? "bg-[#F0A055] text-black"
+            : "bg-[#4A6666] text-white"
+        }`}
+      >
+        Upgrade to Premium
+      </button>
+    </motion.div>
+  </div>
+)}
 
 {showTicTacToe && (
   <div
