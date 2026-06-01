@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { ref, set } from "firebase/database";
 import { db } from "../firebase/config";
+import loadRazorpay from "../utils/loadRazorpay";
 
 function BookingModal({
   showBooking,
@@ -141,41 +142,76 @@ function BookingModal({
 
     <button
 
-      onClick={async () => {
+onClick={async () => {
 
-        if (
-          !bookingData.vehicle ||
-          !bookingData.slot
-        ) {
+  if (
+    !bookingData.vehicle ||
+    !bookingData.slot
+  ) {
+    alert("Please fill all fields");
+    return;
+  }
 
-          alert("Please fill all fields");
-          return;
+  const res = await loadRazorpay();
 
+  if (!res) {
+    alert("Razorpay SDK failed to load");
+    return;
+  }
+
+  const options = {
+    key: import.meta.env.VITE_RAZORPAY_KEY,
+
+    amount: 5000,
+
+    currency: "INR",
+
+    name: "Smart Parking",
+
+    description: `Slot ${bookingData.slot} Reservation`,
+
+    handler: async function (response) {
+
+      await set(
+        ref(
+          db,
+          `bookings/slot${bookingData.slot}`
+        ),
+        {
+          vehicle: bookingData.vehicle,
+          slot: bookingData.slot,
+          bookedAt: new Date().toLocaleTimeString(),
+          paymentId:
+            response.razorpay_payment_id,
         }
+      );
 
-        await set(
-          ref(
-            db,
-            `bookings/slot${bookingData.slot}`
-          ),
-          {
-            vehicle: bookingData.vehicle,
-            slot: bookingData.slot,
-            bookedAt:
-              new Date().toLocaleTimeString(),
-          }
-        );
+      alert(
+        "Payment Successful & Slot Reserved"
+      );
 
-        alert("Slot Reserved Successfully");
+      setBookingData({
+        vehicle: "",
+        slot: "",
+      });
 
-        setBookingData({
-          vehicle: "",
-          slot: "",
-        });
+      setShowBooking(false);
+    },
 
-        setShowBooking(false);
+    prefill: {
+      name: bookingData.vehicle,
+    },
 
-      }}
+    theme: {
+      color: "#4A6666",
+    },
+  };
+
+  const paymentObject =
+    new window.Razorpay(options);
+
+  paymentObject.open();
+}}
 
       className={`w-full ${darkMode ? "bg-[#F0A055] text-black" : "bg-[#4A6666] text-white"} py-4 rounded-2xl font-semibold hover:opacity-90 transition-all`}
     >
