@@ -475,66 +475,35 @@ onClick={() => {
 
 
         {/* TOP BAR */}
+<div className="flex justify-between items-center mb-10 relative z-20">
+  <div>
+  <h1 className={`text-xl md:text-3xl font-bold text-black md:${darkMode ? "text-black" : "text-white"}`}>
+      Dashboard
+    </h1>
+  </div>
 
-        <div className="flex justify-between items-center mb-10 relative z-20">
-
-        <div>
-
-<h1 className={`
-  text-3xl
-  font-bold
-
-  ${darkMode
-    ? "text-black"
-    : "text-white"}
-`}>
-  Dashboard
-</h1>
-
+  <div className="flex items-center gap-2 md:gap-8 text-gray-600 flex-wrap justify-end">
+    <div className={`hidden md:block ${darkMode ? "text-[#F0A055]" : "text-[#4A6666]"}`}>
+      {new Date().toLocaleDateString("en-GB")}
+    </div>
+    <div className={`hidden md:block ${darkMode ? "text-[#F0A055]" : "text-[#4A6666]"}`}>
+      {new Date().toLocaleTimeString()}
+    </div>
+    <button
+      onClick={() => setDarkMode(!darkMode)}
+      className={`px-3 py-1 md:px-5 md:py-2 rounded-2xl font-semibold transition-all text-sm
+        ${darkMode ? "bg-[#F0A055] text-black" : "bg-[#4A6666] text-white"}`}
+    >
+      {darkMode ? "☀️" : "🌙"}
+    </button>
+    <div className="flex items-center gap-2">
+      <div className="w-3 h-3 bg-[#FFC300] rounded-full"></div>
+      <span className={`font-semibold text-sm ${darkMode ? "text-[#F0A055]" : "text-white"}`}>
+        Live
+      </span>
+    </div>
+  </div>
 </div>
-
-          <div className="flex items-center gap-8 text-gray-600">
-
-          <div className={`${darkMode ? "text-[#F0A055]" : "text-[#4A6666]"}`}>
-  {new Date().toLocaleDateString("en-GB")}
-</div>
-
-<div className={`${darkMode ? "text-[#F0A055]" : "text-[#4A6666]"}`}>
-  {new Date().toLocaleTimeString()}
-</div>
-
-          <button
-
-onClick={() => setDarkMode(!darkMode)}
-
-className={`
-  px-5
-  py-2
-  rounded-2xl
-  font-semibold
-  transition-all
-
-  ${darkMode
-    ? "bg-[#F0A055] text-black"
-    : "bg-[#4A6666] text-white"}
-`}
->
-
-{darkMode ? "☀️" : "🌙"}
-
-</button>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-[#FFC300] rounded-full"></div>
-              <span className={`font-semibold ${darkMode ? "text-[#F0A055]" : ""}`}>
-  Live
-</span>
-            </div>
-
-            
-
-          </div>
-
-        </div>
 
         {/* COMPACT STATUS BAR */}
 
