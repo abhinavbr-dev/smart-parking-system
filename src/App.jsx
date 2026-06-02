@@ -625,7 +625,7 @@ onClick={() => {
 
   ${darkMode
     ? "bg-[#1A0F0A]/60 border-[#F0A055]/20"
-    : "bg-white/50 border-gray-100"}
+    : "bg-[#E5E5E5]/70 border-gray-100"}
 `}
             >
 
